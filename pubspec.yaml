@@ -42,6 +42,14 @@ dependencies:
   json_serializable: ^6.5.4
   json_annotation: ^4.7.0
   geolocator: ^9.0.2
+  cloud_firestore: ^4.3.1
+
+  # for firebase
+  firebase_core: ^2.4.0
+  
+  # for authentication
+  firebase_auth: ^4.2.1
+  google_nav_bar: ^5.0.6
 
 dev_dependencies:
   flutter_test:
@@ -67,12 +75,12 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/
   #   - images/a_dot_ham.jpeg
 
-  assets:
-    - lib/assets/locations.json
+  # assets:
+    # - lib/assets/locations.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
