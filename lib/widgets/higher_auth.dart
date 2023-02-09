@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:google_maps_in_flutter/pages/status.dart';
+import 'package:skeletons/skeletons.dart';
 
-import '../pages/status.dart';
+// import '../pages/status.dart';
 
 class HigherAuth extends StatefulWidget {
   @override
@@ -27,7 +27,8 @@ class _HigherAuthState extends State<HigherAuth> {
     List<String> documentIds = [];
     await FirebaseFirestore.instance
         .collection('problems')
-        .where("higherAuthority", isEqualTo: false)
+        .where("higherAuthority", isEqualTo: true)
+        .where("problemProcess", isNotEqualTo: "completed")
         .get()
         .then(
           (snapshot) => snapshot.docs.forEach(
@@ -40,11 +41,16 @@ class _HigherAuthState extends State<HigherAuth> {
     _docIds = documentIds;
   }
 
-  Future<void> _refreshProblems() async {
+  Future<void> refreshProblems() async {
     List<String> documentIds = [];
     await FirebaseFirestore.instance
         .collection('problems')
-        .where("higherAuthority", isEqualTo: false)
+        // .where("higherAuthority", isEqualTo: false)
+        .where(
+          "problemProcess",
+          isNotEqualTo: "completed",
+        )
+        .where("higherAuthority", isEqualTo: true)
         .get()
         .then(
           (snapshot) => snapshot.docs.forEach(
@@ -69,13 +75,18 @@ class _HigherAuthState extends State<HigherAuth> {
           case ConnectionState.active:
             {
               return Center(
-                child: Text('Loading...'),
+                child: CircularProgressIndicator(),
               );
+              // return Skeleton(
+              //   isLoading: true,
+              //   skeleton: SkeletonListView(),
+              //   child: Container(child: Center(child: Text("Content"))),
+              // );
             }
           case ConnectionState.done:
             {
               return RefreshIndicator(
-                onRefresh: _refreshProblems,
+                onRefresh: refreshProblems,
                 child: ListView.builder(
                   itemCount: _docIds.length,
                   prototypeItem: ListTile(
@@ -89,6 +100,7 @@ class _HigherAuthState extends State<HigherAuth> {
                   itemBuilder: (context, index) {
                     return getSamashya(
                       documentId: _docIds[index],
+                      refreshProblems: refreshProblems,
                     );
                     // return ListTile(
                     //   title: Text(docIds[index]),
@@ -149,7 +161,40 @@ class _HigherAuthState extends State<HigherAuth> {
   }
 }
 
-Widget getSamashya({required String documentId}) {
+Widget getSamashya(
+    {required String documentId, required Function refreshProblems}) {
+  int current_step = 1;
+
+  List<Step> steps = [
+    Step(
+      title: Text('Register Complain'),
+      content: Text('User Registerd Complain'),
+      isActive: true,
+    ),
+    Step(
+      title: Text('Complain Confirmed'),
+      content: Text('Please Confirmed Person complain'),
+      isActive: true,
+    ),
+    Step(
+      title: Text('Complain Processed'),
+      content: Text(''),
+      isActive: true,
+    ),
+    Step(
+      title: Text('Complain Solved'),
+      content: Text('finally you completed'),
+      state: StepState.complete,
+      isActive: true,
+    ),
+    // Step(
+    //   title: Text('Step 5'),
+    //   content: Text('Hello World!'),
+    //   state: StepState.complete,
+    //   isActive: true,
+    // ),
+  ];
+
   //get the collection
   CollectionReference problem =
       FirebaseFirestore.instance.collection('problems');
@@ -169,13 +214,15 @@ Widget getSamashya({required String documentId}) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Status(
+                builder: (context) => Statusbar(
                   documentId: documentId,
                   problemProcess: data['problemProcess'],
+                  refreshProblems: refreshProblems,
                   // problemProcess: data['problemProcess'],
                 ),
               ),
-            )
+            ),
+            refreshProblems,
           },
           isThreeLine: true,
           // isThreeLine: true,
@@ -187,3 +234,136 @@ Widget getSamashya({required String documentId}) {
     },
   );
 }
+
+// class Status extends StatefulWidget {
+//   final String documentId;
+//   final String problemProcess;
+//   final String title = "Stepper Demo";
+
+//   const Status(
+//       {super.key, required this.documentId, required this.problemProcess});
+//   @override
+//   State<Status> createState() {
+//     return _StatusState(
+//         // documentId: documentId,
+//         // problemProcess: problemProcess,
+//         );
+//   }
+// }
+
+// class _StatusState extends State<Status> {
+//   // final String documentId;
+//   // final String problemProcess;
+//   //
+//   int current_step = 1;
+
+//   List<Step> steps = [
+//     Step(
+//       title: Text('Register Complain'),
+//       content: Text('User Registerd Complain'),
+//       isActive: true,
+//     ),
+//     Step(
+//       title: Text('Complain Confirmed'),
+//       content: Text('Please Confirmed Person complain'),
+//       isActive: true,
+//     ),
+//     Step(
+//       title: Text('Complain Processed'),
+//       content: Text(''),
+//       isActive: true,
+//     ),
+//     Step(
+//       title: Text('Complain Solved'),
+//       content: Text('finally you completed'),
+//       state: StepState.complete,
+//       isActive: true,
+//     ),
+//     // Step(
+//     //   title: Text('Step 5'),
+//     //   content: Text('Hello World!'),
+//     //   state: StepState.complete,
+//     //   isActive: true,
+//     // ),
+//   ];
+
+//   // _StatusState({required this.documentId, required this.problemProcess});
+//   @override
+//   Widget build(BuildContext context) {
+//     if (widget.problemProcess == "register") {
+//       current_step = 1;
+//     } else if (widget.problemProcess == "confirmed") {
+//       current_step = 2;
+//     } else if (widget.problemProcess == "processed") {
+//       current_step = 3;
+//     }
+//     //get the collection
+//     CollectionReference problem =
+//         FirebaseFirestore.instance.collection('problems');
+//     //  else if (problemProcess == "solved") {
+//     //    current_step = 1;
+//     // }
+//     return Container(
+//       child: Stepper(
+//         currentStep: this.current_step,
+//         steps: steps,
+//         type: StepperType.vertical,
+//         onStepTapped: (step) {
+//           setState(() {
+//             current_step = step;
+//           });
+//         },
+//         onStepContinue: () {
+//           if (current_step < steps.length - 1) {
+//             if (current_step + 1 == 2) {
+//               //update collection
+//               problem.doc(widget.documentId).update(
+//                 {"problemProcess": "confirmed"},
+//               );
+//               // widget.problemProcess= "confirmed",
+//             } else if (current_step + 1 == 3) {
+//               //update collection
+//               problem.doc(widget.documentId).update(
+//                 {"problemProcess": "processed"},
+//               );
+//             }
+//             setState(() {
+//               current_step += 1;
+//             });
+//           } else {
+//             //update collection
+//             problem.doc(widget.documentId).update(
+//               {"problemProcess": "completed"},
+//             );
+//           }
+//           //  else if (current_step == 4) {
+//           //   current_step = 3;
+//           // }
+//         },
+//         onStepCancel: () {
+//           setState(() {
+//             if (current_step > 1) {
+//               current_step = current_step - 1;
+//               if (current_step == 2) {
+//                 //update collection
+//                 problem.doc(widget.documentId).update(
+//                   {"problemProcess": "confirmed"},
+//                 );
+//               } else if (current_step == 3) {
+//                 //update collection
+//                 problem.doc(widget.documentId).update(
+//                   {"problemProcess": "processed"},
+//                 );
+//               }
+//             } else {
+//               //update collection
+//               problem.doc(widget.documentId).update(
+//                 {"problemProcess": "register"},
+//               );
+//             }
+//           });
+//         },
+//       ),
+//     );
+//   }
+// }

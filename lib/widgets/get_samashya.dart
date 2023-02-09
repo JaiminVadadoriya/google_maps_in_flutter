@@ -1,10 +1,17 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
 import 'package:google_maps_in_flutter/pages/status.dart';
 
 class GetSamashya extends StatelessWidget {
   final String documentId;
-  const GetSamashya({super.key, required this.documentId});
+  final Function refreshProblems;
+  const GetSamashya({
+    Key? key,
+    required this.documentId,
+    required this.refreshProblems,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +34,14 @@ class GetSamashya extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Status(
+                    builder: (context) => Statusbar(
                       documentId: documentId,
                       problemProcess: data['problemProcess'],
+                      refreshProblems: refreshProblems,
                     ),
                   ),
                 );
+                refreshProblems;
               },
             ),
 

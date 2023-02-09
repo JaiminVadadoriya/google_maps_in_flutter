@@ -50,6 +50,7 @@ dependencies:
   # for authentication
   firebase_auth: ^4.2.1
   google_nav_bar: ^5.0.6
+  skeletons: ^0.0.3
 
 dev_dependencies:
   flutter_test:
